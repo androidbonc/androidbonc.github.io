@@ -1,0 +1,33 @@
+---
+layout: post
+title: "Simiki v1.0"
+date: 2014-05-27 11:30
+categories: Project
+---
+
+[Simiki](http://simiki.org/) 是我最近几个月业余时间一直在写的一个Wiki程序。
+
+看了下Git log，第一次提交是在7个月前。其实真正做这个wiki框架是在更早的时间，大概一年前。
+
+那时博客还在用WordPress，后来估计也是感觉WordPress用来记录技术文太麻烦了，应该有一个个人的维基程序来汇总这些笔记，因为平时一直都用Vim，于是最开始选择了[Vimwiki](https://code.google.com/p/vimwiki/)，当然还总结了[使用方法](http://www.wutianqi.com/wiki/vimwiki.html)，后来感觉也不是很好用。
+
+于是大概一年前，那时正用[Markdown](http://daringfireball.net/projects/markdown/)用得很Happy，而成熟的wiki框架，要么是用PHP写的，要么就是太臃肿了，于是自己就用Python简单写了一个Wiki程序，随便取了个名叫tkwiki，主要就是对Markdown文件做解析，然后生成页面，自己维护下首页。
+
+后来感觉写的太烂，就直接重新开始写一个，也就是现在的Simiki。
+
+当时很纠结取名叫啥，因为感觉记录技术这块，越简单越好，当时想了几天，后来拍脑袋，直接就取 `Simple Wiki` 的前三个字母和后三个字母，组成了这个项目的名称。
+
+然后接着把功能、wiki的组织方式等规划了，就开始写了。既然是wiki，就不能像[Jekyll](http://jekyllrb.com/)、[Pelican](http://blog.getpelican.com/)等博客程序一样，以日期为导向；而应该以**树形结构**(也就是目录)为导向，这样不论是定位源文件还是静态输出文件，一个tree命令，可以直接查看文档结构。不过现在暂时就支持一级目录和二级目录，后续也会支持所有级数的目录。
+
+另外就是就是对[reST](http://docutils.sourceforge.net/rst.html)不熟，一直都使用Markdown记录笔记，所以框架暂时也只支持了Markdown，后期会考虑把reST也支持了，毕竟这算是Python官方首选。
+
+当时把基本的写好后，就提交到[PyPI](https://pypi.python.org/pypi/simiki/)上了(因为README用的Markdown, PyPI只支持reST，所以格式是乱的)，当然，估计没人在用，据我现在了解，除了我[自己的wiki](http://wiki.tankywoo.com/)在用外，就是[Jerry](http://wiki.zhangjiee.com/)也在用了，很感谢他对我的支持；另外也要感谢[sutar](https://github.com/sutar)，给我提交过Pull Request，证明这个项目还是有人关注的。
+
+花了7个月的时间，个人感觉还是太慢了，一方面是颈椎不好，有时下班回来后头疼就没精力写了，另外就是还有其它事情要做，无法把业余时间完全投入进来，所以一直就是缓慢的开发中。我估计到后面也不会有太多更改，毕竟我的初衷就是简单，我不会加没用的功能，基本的功能支持后，如果有人想用，完全可以扩展。这也是我前阵子把博客[从Octopress换到Jekyll](http://blog.tankywoo.com/blog/2014/05/03/change-from-octopress-to-jekyll.html)的原因，既然选择使用这种Geek的方式来展现笔记，就应该考虑到用户DIY的情况，而Octopress显然没有注意到这点，连SNS这种东西都要绑定到博客上。
+
+好吧，回归主题，Simiki v1.0 发出了，尽量以简单为主。感觉还有很多地方不满意，最近晚上回来感觉有点写乏味了，准备休息一阵子，晚上回来看看书或读一些优秀的代码，然后考虑再继续折腾，暂时就修补修补Bug吧。
+
+如果喜欢用Markdown写笔记，又准备建一个个人维基的朋友，不妨试试Simiki.
+
+2014-05-27 晚
+

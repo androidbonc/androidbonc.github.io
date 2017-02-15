@@ -1,0 +1,5 @@
+name: "Blog·Tanky Woo"
+description: "Tanky Woo's Blog, focus on Python, Linux, Gentoo, Mac OS, Vim, Open Source and so on."
+markdown: redcarpet
+highlighter: pygments
+exclude: ["fabfile.py*", "*.bak"]

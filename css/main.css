@@ -1,0 +1,247 @@
+/*****************************************************************************/
+/*
+/* Common
+/*
+/*****************************************************************************/
+
+/* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html, body { height: 100%; }
+
+body {
+  font-size: 16px;
+  font-family: Helvetica, Arial, sans-serif;
+  line-height: 1.5em;
+  background-color: #95AFBA;
+  text-align: center;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-bottom: 1em;
+}
+
+p { margin-bottom: 1em; }
+
+a         { color: #1863a1; }
+a:link    { text-decoration: none; }
+a:visited { color: #1863A1; }
+a:hover   { color: #0181eb; }
+a:active   { color: #0181eb; }
+
+/* https://css-tricks.com/snippets/css/simple-and-nice-blockquote-styling/ */
+blockquote {
+  background: #f9f9f9;
+  border-left: 10px solid #ccc;
+  margin: 1.5em 0;
+  padding: 0.5em 10px;
+  quotes: "\201C""\201D""\2018""\2019";
+}
+
+blockquote:before {
+  color: #ccc;
+  content: open-quote;
+  font-size: 4em;
+  line-height: 0.1em;
+  margin-right: 0.25em;
+  vertical-align: -0.4em;
+}
+
+blockquote p {
+  display: inline;  /* TO DO */
+  margin: 0;
+}
+
+hr {
+  margin: 2em 0;
+  color: #ccc;
+  background-color: #ccc;
+  height: 1px;
+  border: none;
+}
+
+/*****************************************************************************/
+/*
+/* Home
+/*
+/*****************************************************************************/
+.posts {
+  list-style-type: none;
+  margin-bottom: 2em;
+}
+
+.posts li {
+  line-height: 1.75em;
+}
+
+.posts span {
+  color: #aaa;
+  font-family: "Courier New", monospace;
+  float: right;
+  font-size: 0.9em;
+}
+
+/*****************************************************************************/
+/*
+/* Site
+/*
+/*****************************************************************************/
+
+.site {
+  text-align: justify;
+  width: 66%;
+  margin: 0 auto;
+  line-height: 1.5em;
+  padding: 1em 2em 2em 2em;
+  border: 1px solid #ddd;
+  background-color: #fbfffd;
+}
+
+.header {
+  border-bottom: 1px solid #e8e8e8;
+  margin-bottom: 2em;
+}
+
+.header a {
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.title {
+  display: inline-block;
+  margin-bottom: 2em;
+  font-size: 1em;
+}
+
+.title a       { color: #a00; }
+.title a:hover { color: #000; }
+
+.header a.extra {
+  color: #aaa;
+  margin-left: 1em;
+  font-size: 13px;
+}
+
+.header a.extra:hover {
+  color: #a00;
+}
+
+.meta {
+  text-align: center;
+  color: #aaa;
+}
+
+.footer {
+  font-size: 80%;
+  color: #333;
+  border-top: 1px solid #e8e8e8;
+  margin-top: 2em;
+  overflow: hidden;
+}
+
+.footer .contact {
+  float: right;
+  padding-top: 1em;
+}
+
+.footer .contact a, .footer .license a {
+  color: #8085C1;
+}
+
+.footer .license {
+  float: left;
+  padding-top: 1em;
+}
+
+/*****************************************************************************/
+/*
+/* Posts
+/*
+/*****************************************************************************/
+
+#pagetitle {
+  text-align: center;
+}
+
+#pagetitle h2 {
+  font-size: 19px;
+}
+
+/* standard */
+.post pre {
+  font-family: Consolas, "DejaVu Sans Mono", "Lucida Console", Monaco, Andale Mono, "MS Gothic", monospace;
+  font-size: 80%;
+  padding: 0 .4em;
+  overflow: auto;
+  margin: 1em 0;
+  padding: 5px 0 5px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  white-space: pre-wrap;       /* CSS 3 */
+  white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+  white-space: -pre-wrap;      /* Opera 4-6 */
+  white-space: -o-pre-wrap;    /* Opera 7 */
+  word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+
+.post ul, .post ol {
+  margin-left: 2.6em;
+  margin-bottom: 1em;
+}
+
+.post p code {
+  padding: 0 .2em;
+  margin: 0 .2em;
+  font-size: 90%;
+  color: #c7254e;
+  background-color: #f9f2f4;
+  white-space: nowrap;
+  border-radius: 4px;
+}
+
+.post pre code {
+  font-family: Consolas, "DejaVu Sans Mono", "Lucida Console", Monaco, Andale Mono, "MS Gothic", monospace;
+  padding: 0 .2em;
+  border: none;
+  white-space: pre;
+}
+
+.post h1 {
+  font-size: 1.6em;
+  line-height: 1em;
+  margin-bottom: 0.66em;
+}
+
+.post h2 {
+  font-size: 1.3em;
+  margin-bottom: 0.6em;
+}
+
+.post h2:before, .post h3:before {
+  color: #42b983;
+  margin-right: 0.3em;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.post h2:before {
+  content: "##";
+}
+.post h3:before {
+  content: "###";
+}
+
+.post p img {
+  width: 100%;
+}
+
+/*****************************************************************************/
+/*
+/* Reset Syntax color
+/*
+/*****************************************************************************/
+/* for colorful */
+.highlight  { background: #fbfffd; }

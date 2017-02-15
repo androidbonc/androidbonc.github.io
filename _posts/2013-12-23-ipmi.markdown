@@ -1,0 +1,34 @@
+---
+layout: post
+title: "Use Ipmi To Change Ipmi Ip Configuration"
+date: 2013-12-23 18:29
+comments: true
+categories: Other
+---
+
+<!-- more -->
+
+通过 `sol` 登陆终端:
+
+	ipmitool -I lanplus -H <hostname> -U <username> -P <password> sol activate
+
+加载内核模块:
+
+	modprobe ipmi_devintf
+	modprobe ipmi_si
+
+修改本机ipmi的ip/netmask/gw:
+
+	ipmitool -I open lan set 1 ipaddr <ip>
+	ipmitool -I open lan set 1 netmask <netmask>
+	ipmitool -I open lan set 1 defgw ipaddr <gw>
+
+确认配置:
+
+	ipmitool lan print 1
+
+参考:
+
+* [ipmitool - utility for controlling IPMI-enabled devices](http://netkiller.github.io/monitoring/ipmitool.html)
+* [IPMI总结](http://www.chenshake.com/summary-of-ipmi/)
+* [ipmitool 对linux服务器进行IPMI管理](http://my.oschina.net/davehe/blog/88801)

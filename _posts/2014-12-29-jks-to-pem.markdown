@@ -1,0 +1,152 @@
+---
+layout: post
+title: "JKS to PEM"
+date: 2014-12-29 14:10
+---
+
+[JKS(Java KeyStore)](http://en.wikipedia.org/wiki/Keystore)是Java的一个证书仓库, 包括授权证书和公钥证书等.
+
+	$ file tankywoo.jks
+	tankywoo.jks: Java KeyStore
+
+JDK 提供了一个工具 [keytool](http://docs.oracle.com/javase/6/docs/technotes/tools/solaris/keytool.html) 用于管理keystore.
+
+安装`JDK`:
+
+	# Gentoo
+	$ sudo emerge -av virtual/jdk
+
+	# Ubuntu 两个都行
+	# sudo apt-get install openjdk-6-jdk	# 1.6
+	# sudo apt-get install openjdk-7-jdk	# 1.7 
+
+(如果安装`JRE`, 则`emerge -av virtual/jre`)
+
+现提供了一个JKS证书文件和证书的密码，需要转成PEM文件给Nginx SSL配置.
+
+先通过keytool导出成`PKCS12`格式(`.p12`后缀):
+
+	$ keytool -importkeystore -srckeystore tankywoo.jks -destkeystore tankywoo.p12 -srcstoretype jks -deststoretype pkcs12
+	Enter destination keystore password:
+	Re-enter new password:
+	Enter source keystore password:
+	Entry for alias foo successfully imported.
+	Import command completed:  1 entries successfully imported, 0 entries failed or cancelled
+
+指定源(jks)文件和目标(pkcs)文件的文件名和类型.
+
+执行时输入设置给pkcs12证书的密码, 以及jks证书的密码.
+
+再通过`openssl`将pkcs12文件导出成`pem`格式文件.
+
+	# 生成key 加密的pem证书
+	$ openssl pkcs12 -in tankywoo.p12 -out tankywoo.pem
+	Enter Import Password:
+	MAC verified OK
+	Enter PEM pass phrase:
+	Verifying - Enter PEM pass phrase:
+
+	# 生成key 非加密的pem证书
+	$ openssl pkcs12 -nodes -in tankywoo.p12 -out tankywoo.pem
+	Enter Import Password:
+	MAC verified OK
+
+也可以分开导出:
+
+导出key:
+
+	# 生成加密的key
+	$ openssl pkcs12 -in tankywoo.p12  -nocerts -out server.key
+	Enter Import Password:
+	MAC verified OK
+	Enter PEM pass phrase:
+	Verifying - Enter PEM pass phrase:
+
+	# 生成非加密的key
+	$ openssl pkcs12 -in tankywoo.p12 -nocerts -nodes -out server.key
+	Enter Import Password:
+	MAC verified OK
+
+导出server证书:
+
+	$ openssl pkcs12 -in tankywoo.p12  -nokeys -clcerts -out server.crt
+	Enter Import Password:
+	MAC verified OK
+
+导出ca证书:
+
+	$ openssl pkcs12 -in tankywoo.p12  -nokeys -cacerts -out ca.crt
+	Enter Import Password:
+	MAC verified OK
+
+---
+
+2015-03-11 补充:
+
+今天有一个jks证书, 导出为p12时报错:
+
+	$ keytool -importkeystore -srckeystore keystore.jks -destkeystore keystore.p12 -srcstoretype jks -deststoretype pkcs12
+
+	Enter destination keystore password:
+	Re-enter new password:
+	Enter source keystore password:
+	Entry for alias keystore successfully imported.
+	Problem importing entry for alias intermediate2: java.security.KeyStoreException: TrustedCertEntry not supported.
+	Entry for alias intermediate2 not imported.
+	Do you want to quit the import process? [no]:  n
+	Problem importing entry for alias intermediate1: java.security.KeyStoreException: TrustedCertEntry not supported.
+	Entry for alias intermediate1 not imported.
+	Do you want to quit the import process? [no]:  n
+	Import command completed:  1 entries successfully imported, 2 entries failed or cancelled
+
+生成的p12只能导出server.crt和ca.crt, 无法导出server.key
+
+查看jks证书内容:
+
+	$ keytool -list -v -keystore keystore.jks
+
+看到有两个`trustedCertEntry`
+
+	Alias name: intermediate1
+	Creation date: Apr 30, 2014
+	Entry type: trustedCertEntry
+	...
+
+	Alias name: intermediate2
+	Creation date: Apr 30, 2014
+	Entry type: trustedCertEntry
+	...
+
+这个讨论里提到了原因: [ref 1](http://stackoverflow.com/questions/652916/converting-a-java-keystore-into-pem-format#comment1252648_656559)
+
+具体也可以看[手册](http://docs.oracle.com/javase/6/docs/technotes/guides/security/jsse/JSSERefGuide.html#InstallProbs)
+
+	java.security.KeyStoreException: TrustedCertEntry not supported
+	Problem: Attempt to store trusted certificates in PKCS12 keystore throws java.security.KeyStoreException: TrustedCertEntry not supported.
+
+	Cause 1: We do not support storing trusted certificates in pkcs12 keystore. PKCS12 is mainly used to deliver private keys with the associated cert chains. It does not have any notion of "trusted" certificates. Note that in terms of interoperability, other pkcs12 vendors have the same restriction. Browsers such as Mozilla and Internet Explorer do not accept a pkcs12 file with only trusted certs.
+
+	Solution 1: Use JKS (or JCEKS) keystore for storing trusted certificates.
+
+但是把Google搜了一圈, 也没发现解决方法, 囧.
+
+后来问老大, 刚好他几年前的一篇博客有方法 [从 JKS keystore 中迁移证书到 Apache](http://blog.clanzx.net/2010/07/08/ssl.html)
+
+具体可参考这篇博客[Exporting the Private Key From a JKS Keystore](http://anandsekar.github.io/exporting-the-private-key-from-a-jks-keystore/), 这是一个java写的工具, 下载zip包直接使用 [ExportPrivateKey.zip](http://anandsekar.github.io/assets/downloads/pkexport/ExportPrivateKey.zip)
+
+调用方式:
+
+	java -jar ExportPrivateKey.zip {keystore_path} JKS {keystore_password} {alias} {target_file}
+
+alias可以通过上面的`keytool -list`看到.
+
+用此命令生成了server.key, 和之前生成的server.crt, ca.crt合并就可以了
+
+---
+
+参考:
+
+* [Converting a Java Keystore into PEM Format](http://stackoverflow.com/questions/652916/converting-a-java-keystore-into-pem-format)
+* [Nginx SSL 配置:证书文件制作](http://blog.sina.com.cn/s/blog_4b81125f0100ky4e.html)
+* [Java Keytool Essentials: Working with java Keytools](https://www.digitalocean.com/community/tutorials/java-keytool-essentials-working-with-java-keystores)
+* [Extracting public and private keys from a Java Key Store (JKS)](http://crishantha.com/wp/?p=445)

@@ -1,0 +1,288 @@
+/*****************************************************************************/
+/*
+/* Common
+/*
+/*****************************************************************************/
+
+/* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html, body { height: 100%; }
+
+body {
+  font-size: 14px;
+  /* font-family: Arial, Helvetica, sans-serif; */
+  /* font-family: Cambria, "Hoefler Text", Utopia, "Liberation Serif", "Nimbus Roman No9 L Regular", Times, "Times New Roman", serif; */
+  /* font-family: Helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif; */
+  font-family: "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+  line-height: 1.6em;
+  /* background-color: #95AFBA; */
+  /* background-color: #333; */
+  background-color: #eee;
+  text-align: center;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-bottom: 1em;
+}
+
+p { margin-bottom: 1em; }
+
+a         { color: #296bcc; }
+a:link    { text-decoration: underline; }
+a:visited { color: #296bcc; }
+a:hover   { color: #296bcc; }
+a:active   { color: #296bcc; }
+
+
+hr {
+  margin: 2em 0;
+  color: #ccc;
+  background-color: #ccc;
+  height: 1px;
+  border: none;
+}
+
+/*****************************************************************************/
+/*
+/* Home
+/*
+/*****************************************************************************/
+.posts {
+	list-style-type: square;
+	margin-bottom: 2em;
+}
+
+.posts li {
+	line-height: 2em;
+	padding-left: 9px;
+	margin-bottom: -1px;
+	height: 34px;
+	overflow: hidden;
+	border-left: 1px solid #FFFFFF;
+	border-right: 1px solid #FFFFFF;
+	border-top: 1px solid #EFEFEF;
+	border-bottom: 1px solid #FFFFFF;
+	/* cursor: pointer; */
+}
+
+.posts span {
+  color: #aaa;
+  font-family: "Courier New", monospace;
+  float: right;
+  font-size: 0.9em;
+}
+
+.posts a {
+    color: rgb(46, 65, 92);
+    font-weight: 550;
+}
+.posts a:link { text-decoration: none; }
+.posts a:visited { text-decoration: none; }
+
+/*****************************************************************************/
+/*
+/* Site
+/*
+/*****************************************************************************/
+
+.site {
+  text-align: justify;
+  width: 800px;
+  margin: 0 auto;
+  line-height: 1.6em;
+  padding: 1em 2em 2em 2em;
+  /* border: 1px solid #ddd; */
+  /* background-color: #fbfffd; */
+  background-color: #fff;
+  margin: 2em auto;
+}
+
+.header {
+  border-bottom: 1px solid #e8e8e8;
+  margin-bottom: 2em;
+}
+
+.header a {
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.title {
+  display: inline-block;
+  /* margin-bottom: 2em; */
+  font-size: 1em;
+}
+
+.title a       { color: #a00; }
+
+.header a.extra {
+  /* color: rgb(46, 65, 92); */
+  margin-left: 1em;
+  font-size: 13px;
+}
+
+.header a.extra:hover {
+text-decoration: underline;
+}
+
+.meta {
+	color: rgb(46, 65, 92);
+  text-align: center;
+}
+
+.footer {
+  font-size: 80%;
+  color: #333;
+  border-top: 1px solid #e8e8e8;
+  margin-top: 2em;
+  overflow: hidden;
+}
+
+.footer .contact {
+  float: right;
+  padding-top: 1em;
+}
+
+.footer .contact a, .footer .license a {
+  color: #8085C1;
+}
+
+.footer-left {
+  float: left;
+  padding-top: 1em;
+  line-height: 0.5em;
+}
+
+/*****************************************************************************/
+/*
+/* Posts
+/*
+/*****************************************************************************/
+
+#pagetitle {
+	color: rgb(46, 65, 92);
+  text-align: center;
+}
+
+#pagetitle h2 {
+  font-size: 19px;
+}
+
+.post h2 {
+  margin-top: 2em;
+}
+
+/* standard */
+pre code {
+    font-size: 1em;
+    padding: 0px;
+    top: 0px;
+}
+
+code, pre {
+	color: rgb(46, 65, 92);
+	background-color: #f1f5fa;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-radius: 3px;
+    /* font-family: Consolas,"Liberation Mono",Menlo,Courier,monospace; */
+}
+
+pre {
+    font-size: .9em;
+    padding: 16px 16px 14px 16px;
+    white-space: pre-wrap;
+}
+
+code {
+    padding-left: 5px;
+    padding-right: 5px;
+    font-size: .9em;
+    position: relative;
+    top: -1px;
+}
+
+.post pre {
+  overflow: auto;
+  margin: 1em 0;
+  white-space: pre-wrap;       /* CSS 3 */
+  white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+  white-space: -pre-wrap;      /* Opera 4-6 */
+  white-space: -o-pre-wrap;    /* Opera 7 */
+  word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+
+.post ul, .post ol {
+  margin-left: 2.6em;
+  margin-bottom: 1em;
+}
+
+.post p code {
+  white-space: nowrap;
+}
+
+.post h1 {
+  font-size: 1.6em;
+  line-height: 1em;
+  margin-bottom: 0.66em;
+}
+
+.post p img {
+  width: 100%;
+}
+
+/*****************************************************************************/
+/*
+/* Reset Syntax color
+/*
+/*****************************************************************************/
+/* for colorful */
+.highlight  { background: #fbfffd; }
+
+/* add scrollbar if code too long */
+.highlight pre {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/******/
+
+.lang {
+  position: relative;
+}
+
+/* pre < code.language-bash::before { */
+
+.lang::before {
+  display: inline;
+  content: "text";
+  position: absolute;
+  background: white;
+  top: 0px;
+  right: 0px;
+  padding: 3px;
+  border-left: 1px solid silver;
+  border-bottom: 1px solid silver;
+  font-style: oblique;
+}
+
+.bash::before { content: "bash" !important; }
+.python::before { content: "python" !important; }
+
+
+/*****************************************************************************/
+/*
+/* Other
+/*
+/*****************************************************************************/
+.gzh {
+  text-align: center;
+}
+
+.post p .gzh img {
+  width: auto;
+}

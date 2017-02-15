@@ -1,0 +1,76 @@
+---
+layout: post
+title: "Linux OOM"
+date: 2015-05-14 16:00
+---
+
+某个机器看到一条日志:
+
+> Out of Memory: Kill process xxx (xxx) score 707 or sacrifice child
+
+并且syslog, ssh等进程都被kill掉了.
+
+简单了解了下OOM(Out of Memory)相关的问题
+
+在Linux下，如果系统不足以分配程序申请的内存, `OOM Killer`就会被调用, 它会选择某个进程然后杀掉.
+
+`man 5 proc`可以看到:
+
+在Linux 2.6.11后, `/proc/[pid]/oom_adj` 可以控制oom的优先级等, 从-16到15, 数值越小, 被kill的可能性越低. 特殊值-17表示对当前进程禁用oom killer.
+在Linux 2.6.36后, `/proc/[pid]/oom_adj` 被弃用了, 改为 `/proc/[pid]/oom_score_adj`, 值从-1000到1000, 越小被kill概率越小, -1000表示不被kill.
+
+一般的进程 `/proc/[pid]/oom_score_adj` 值是0, 像ssh是-1000
+
+关于`vm.overcommit_memory`, `man 5 proc`也可以看到:
+
+	/proc/sys/vm/overcommit_memory
+		This file contains the kernel virtual memory accounting mode.  Values are:
+
+				0: heuristic overcommit (this is the default)
+				1: always overcommit, never check
+				2: always check, never overcommit
+
+		  In mode  0, calls of mmap(2) with MAP_NORESERVE are not checked, and the default check is very weak, leading to the risk of getting a process "OOM-
+		  killed".  Under Linux 2.4, any nonzero value implies mode 1.
+
+		  In mode 2 (available since Linux 2.6), the total virtual address space that can be allocated (CommitLimit in /proc/meminfo) is calculated as
+
+			  CommitLimit = (total_RAM - total_huge_TLB) *
+							overcommit_ratio / 100 + total_swap
+
+		  where:
+
+			   *  total_RAM is the total amount of RAM on the system;
+
+			   *  total_huge_TLB is the amount of memory set aside for huge pages;
+
+			   *  overcommit_ratio is the value in /proc/sys/vm/overcommit_ratio; and
+
+			   *  total_swap is the amount of swap space.
+
+
+默认是0; 如果设置为2, 则不会出现nevercommit. 这个overcommit, 涉及到一个如上计算公式.
+
+写了一个小程序用来耗尽内存:
+
+	$ more memtest.c
+	#include <stdio.h>
+	#include <stdlib.h>
+
+	int main() {
+		int *p;
+		while(1) {
+			int inc=10*sizeof(char);
+			p=(int*) calloc(1,inc);
+			*p = 123456;
+			if(!p) break;
+		}
+	}
+
+默认情况下一会程序就被killed掉了, 如果设置另外一个进程的`oom_score_adj`为1000, 则这个进程先被杀掉.
+
+这篇文章的[9.6节](http://www.win.tue.nl/~aeb/linux/lk/lk-9.html)讲得挺好的, 还有这个[回答](http://serverfault.com/a/606193)
+
+---
+
+当然, 还有问题，为何ssh等也都被杀掉了? 很奇葩

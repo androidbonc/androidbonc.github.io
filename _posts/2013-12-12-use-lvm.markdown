@@ -1,0 +1,246 @@
+---
+layout: post
+title: "use lvm"
+date: 2013-12-12 16:18
+comments: true
+categories: Linux
+---
+
+<!-- more -->
+
+假设原先 /home 是单独挂载的, 还有一个 swap 分区, 现在除了根分区外, home 和 swap 都使用lvm.
+
+因为要把 `/home` 和 `swap` 分区放到 lvm 里, 所以先 umount 掉这两个分区, 或者在 `/etc/fstab` 里注释掉, 然后重启.
+
+
+## 分区阶段 ##
+
+这里使用 `parted` 操作大于 `2T` 的硬盘, 小于 2T 的用 `fdisk` 比较简单.
+
+	# 首先设置 disklabel 为 gpt
+	(parted) mklabel gpt
+	Warning: The existing disk label on /dev/sdb will be destroyed and all data on this disk will be lost. Do you want to continue?
+	Yes/No? Yes
+
+	# 使用 print 查看当前的硬盘信息和分区表
+	(parted) print
+	Model: VMware Virtual disk (scsi)
+	Disk /dev/sdb: 2147GB
+	Sector size (logical/physical): 512B/512B
+	Partition Table: gpt  # <--- 注意这里是 GPT 了
+
+	Number  Start  End  Size  File system  Name  Flags
+
+	# 把整块盘全部分给一个区
+	(parted) mkpart primary ext4 0G -0G
+
+	(parted) print
+	Model: VMware Virtual disk (scsi)
+	Disk /dev/sdb: 2147GB
+	Sector size (logical/physical): 512B/512B
+	Partition Table: gpt
+
+	Number  Start   End     Size    File system  Name     Flags
+	 1      1049kB  2147GB  2147GB  ext4         primary
+
+	# 设置分区1的 flag 为 lvm
+	(parted) set 1 lvm on
+
+	(parted) print
+	Model: VMware Virtual disk (scsi)
+	Disk /dev/sdb: 2147GB
+	Sector size (logical/physical): 512B/512B
+	Partition Table: gpt
+
+	Number  Start   End     Size    File system  Name     Flags
+	 1      1049kB  2147GB  2147GB  ext4         primary  lvm
+
+
+## 创建 PV ##
+
+	root@tankywoo:~# pvscan
+	  No matching physical volumes found
+
+	root@tankywoo:~# pvcreate /dev/sdb1
+	  Physical volume "/dev/sdb1" successfully created
+
+	root@tankywoo:~# pvscan
+	  PV /dev/sdb1                      lvm2 [1.95 TiB]
+	  Total: 1 [1.95 TiB] / in use: 0 [0   ] / in no VG: 1 [1.95 TiB]
+
+	root@tankywoo:~# pvdisplay
+	  "/dev/sdb1" is a new physical volume of "1.95 TiB"
+	  --- NEW Physical volume ---
+	  PV Name               /dev/sdb1
+	  VG Name               
+	  PV Size               1.95 TiB
+	  Allocatable           NO
+	  PE Size               0   
+	  Total PE              0
+	  Free PE               0
+	  Allocated PE          0
+	  PV UUID               Uy019B-gKNF-b3b6-1iQm-Wc8j-eu0r-Ign88Q
+
+## 创建 VG ##
+
+	root@tankywoo:~#  vgscan
+	  Reading all physical volumes.  This may take a while...
+	  No volume groups found
+
+	root@tankywoo:~# vgcreate vg_data /dev/sdb1
+	  Volume group "vg_data" successfully created
+
+	root@tankywoo:~# vgscan
+	  Reading all physical volumes.  This may take a while...
+	  Found volume group "vg_data" using metadata type lvm2
+
+	root@tankywoo:~# pvscan
+	  PV /dev/sdb1   VG vg_data   lvm2 [1.95 TiB / 1.95 TiB free]
+	  Total: 1 [1.95 TiB] / in use: 1 [1.95 TiB] / in no VG: 0 [0   ]
+
+	root@tankywoo:~# pvdisplay
+	  --- Physical volume ---
+	  PV Name               /dev/sdb1
+	  VG Name               vg_data
+	  PV Size               1.95 TiB / not usable 2.00 MiB
+	  Allocatable           yes 
+	  PE Size               4.00 MiB
+	  Total PE              511999
+	  Free PE               511999
+	  Allocated PE          0
+	  PV UUID               Uy019B-gKNF-b3b6-1iQm-Wc8j-eu0r-Ign88Q
+	   
+	root@tankywoo:~# vgdisplay
+	  --- Volume group ---
+	  VG Name               vg_data
+	  System ID
+	  Format                lvm2
+	  Metadata Areas        1
+	  Metadata Sequence No  1
+	  VG Access             read/write
+	  VG Status             resizable
+	  MAX LV                0
+	  Cur LV                0
+	  Open LV               0
+	  Max PV                0
+	  Cur PV                1
+	  Act PV                1
+	  VG Size               1.95 TiB
+	  PE Size               4.00 MiB
+	  Total PE              511999
+	  Alloc PE / Size       0 / 0
+	  Free  PE / Size       511999 / 1.95 TiB
+	  VG UUID               10ZcUK-rhuw-6msS-r7ZN-fVEB-pw7I-Tf0SQd
+
+## 创建 LV ##
+
+	# 什么输出都没有
+	root@tankywoo:~# lvscan
+
+	# 创建一个大小为 500G, 名称为 lv_home 的 LV
+	root@tankywoo:~# lvcreate -L 500G -n lv_home vg_data
+	  Logical volume "lv_home" created
+
+	root@tankywoo:~# lvscan
+	  ACTIVE            '/dev/vg_data/lv_home' [500.00 GiB] inherit
+
+	root@tankywoo:~# lvdisplay
+	  --- Logical volume ---
+	  LV Name                /dev/vg_data/lv_home
+	  VG Name                vg_data
+	  LV UUID                rOJeiw-9Pjk-O7R3-vBU1-hkHt-KY67-v4ZH3O
+	  LV Write Access        read/write
+	  LV Status              available
+	  # open                 0
+	  LV Size                500.00 GiB
+	  Current LE             128000
+	  Segments               1
+	  Allocation             inherit
+	  Read ahead sectors     auto
+	  - currently set to     256
+	  Block device           254:0
+	
+	# 看 `Alloc PE / Size` 字段可以看出有500G被分配了
+	root@tankywoo:~# vgdisplay
+	  --- Volume group ---
+	  VG Name               vg_data
+	  System ID             
+	  Format                lvm2
+	  Metadata Areas        1
+	  Metadata Sequence No  2
+	  VG Access             read/write
+	  VG Status             resizable
+	  MAX LV                0
+	  Cur LV                1
+	  Open LV               0
+	  Max PV                0
+	  Cur PV                1
+	  Act PV                1
+	  VG Size               1.95 TiB
+	  PE Size               4.00 MiB
+	  Total PE              511999
+	  Alloc PE / Size       128000 / 500.00 GiB
+	  Free  PE / Size       383999 / 1.46 TiB
+	  VG UUID               10ZcUK-rhuw-6msS-r7ZN-fVEB-pw7I-Tf0SQd
+   
+	# 可以在 `/dev` 下看到这个device了
+	root@tankywoo:~# ll /dev/vg_data/lv_home 
+	lrwxrwxrwx 1 root root 7 Dec 12 17:03 /dev/vg_data/lv_home -> ../dm-0
+
+	# 删除 LV
+	root@tankywoo:~# lvremove /dev/vg_data/lv_home 
+	Do you really want to remove active logical volume lv_home? [y/n]: y
+	  Logical volume "lv_home" successfully removed
+
+接下来可以再创建一个 lv_swap 给 `4G` 做 swap.
+
+
+## 使用 LV 创建分区 ##
+
+	# 创建 home 分区, 分区名 /home
+	mkfs -t ext4 -L /home /dev/vg_data/lv_home
+
+
+	# TODO swap 这块有warning
+	root@tankywoo:~# mkswap -L ksswap /dev/vg_data/lv_swap 
+	mkswap: /dev/vg_data/lv_swap: warning: don't erase bootbits sectors
+			on whole disk. Use -f to force.
+	Setting up swapspace version 1, size = 4194300 KiB
+	LABEL=ksswap, UUID=58e85fcb-4480-4b68-926b-1a9aff7c55d4
+	root@tankywoo:~# mkswap -L ksswap -f /dev/vg_data/lv_swap 
+	Setting up swapspace version 1, size = 4194300 KiB
+	LABEL=ksswap, UUID=51e64ea6-2e9e-4fcd-b883-bffbb903a6db
+
+## 最后确认 ##
+
+	# 查看分区label 等
+	root@tankywoo:~# blkid
+	/dev/sdb1: UUID="Uy019B-gKNF-b3b6-1iQm-Wc8j-eu0r-Ign88Q" TYPE="LVM2_member" 
+	/dev/sda1: LABEL="/" UUID="ac1c1e55-aedb-45b4-8814-8061f1ea580a" TYPE="ext3" 
+	/dev/sr0: LABEL="CDROM" TYPE="iso9660" 
+	/dev/mapper/vg_data-lv_home: UUID="c1a747d9-131b-41c8-87f1-78221785d037" TYPE="ext4" LABEL="/home" 
+	/dev/mapper/vg_data-lv_swap: LABEL="ksswap" UUID="51e64ea6-2e9e-4fcd-b883-bffbb903a6db" TYPE="swap"
+
+	# 挂载
+	root@tankywoo:~# mount -t ext4 /dev/vg_data/lv_home  /home
+	root@tankywoo:~# swapon /dev/vg_data/lv_swap 
+
+	# 查看 lv_home 是否挂在到 /home 分区
+	root@tankywoo:~# df -lh
+	Filesystem               Size  Used Avail Use% Mounted on
+	/dev/sda1                7.9G  1.5G  6.1G  20% /
+	udev                      60G   12K   60G   1% /dev
+	tmpfs                     24G  144K   24G   1% /run
+	none                     5.0M     0  5.0M   0% /run/lock
+	none                      60G     0   60G   0% /run/shm
+	/dev/mapper/vg_data-lv_home  493G   70M  467G   1% /home
+
+	# 查看 lv_swap 是否当作 swap 起来.
+	root@tankywoo:~# free -mt
+				 total       used       free     shared    buffers     cached
+	Mem:        120883       1180     119703          0         10        165
+	-/+ buffers/cache:       1004     119879
+	Swap:         4095          0       4095
+	Total:      124979       1180     123799
+
+*注意* : 最后记得 `update-grub` !
